@@ -120,7 +120,7 @@ class GungeonWorld(World):
         for i in range(0, consumables_count):
             item_pool.append(self.create_item(list(pickup_item_table)[i % len(pickup_item_table)]))
 
-        trap_count = Items.ItemPoolGeneration.get_consumables_count(self.options.traps.value)
+        trap_count = Items.ItemPoolGeneration.get_traps_count(self.options.traps.value)
         "Traps =============================="
         for i in range(0, trap_count):
             item_pool.append(self.create_trap_item(list(trap_item_table)[i % len(trap_item_table)]))

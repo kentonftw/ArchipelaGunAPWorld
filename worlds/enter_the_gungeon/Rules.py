@@ -1,51 +1,36 @@
 import typing
-import math
 from BaseClasses import CollectionState, MultiWorld
-from .Options import GungeonOptions
-from .Items import item_table
-from .Locations import GungeonLocation
-from ..generic.Rules import add_rule
+from .Options import (GungeonOptions, DragunGoal, LichGoal, KillThePastGoal, BaseSecretChamberBosses,
+                      AdvancedGungeonDragunsBosses, FarewellToArmsBosses)
 
-def get_chest_string(number: int) -> str:
-    return f"Chest {number + 1} (Any Rarity)"
 
-def has_completed_objectives(multiworld: MultiWorld, options: GungeonLocation, player, state: CollectionState) -> bool:
-    """
-    if options.old_king.value:
-        if not state.has("Defeat The Old King", player):
-            return False
+def get_required_goal_events(options: GungeonOptions) -> typing.List[str]:
+    """Event items (placed in __init__.place_events) that the chosen goal options require."""
+    required = []
 
-    if options.resourceful_rat.value:
-        if not state.has("Defeat The Resourceful Rat", player):
-            return False
-        
-    if options.agunim.value:
-        if not state.has("Defeat Agunim", player):
-            return False
-        
-    if options.advanced_dragun.value:
-        if not state.has("Defeat The Advanced Dragun", player):
-            return False
+    if options.dragun.value == DragunGoal.option_required:
+        required.append("Defeat The High Dragun")
+    if options.lich.value == LichGoal.option_required:
+        required.append("Defeat The Lich")
+    if options.past_kills.value != KillThePastGoal.option_optional:
+        required.append("Past Killed")
+    if options.base_secret_chamber.value == BaseSecretChamberBosses.option_required:
+        required.append("Base Secret Chamber Bosses")
+    if options.advanced_gungeon.value == AdvancedGungeonDragunsBosses.option_required:
+        required.append("Advanced Gungeon Bosses")
+    # Note: this option's values are inverted compared to the others (required = 0, optional = 1).
+    if options.farewell_arms.value == FarewellToArmsBosses.option_required:
+        required.append("Farewell To Arms Bosses")
 
-    return state.has("Defeat The Lich", player)
-    """
+    return required
 
-def set_rules(multiworld: MultiWorld, options: GungeonOptions, player, area_connections: typing.Dict[int, int], area_cost_map: typing.Dict[int, int]):
 
-    """
-    total_chests = get_total_chests(options)
-    #Make sure we have at least n progression items after opening a percentage of total chests
-    for i in range (math.floor(total_chests * 0.125), total_chests):
-        multiworld.get_location(get_chest_string(i), player).access_rule = lambda state: state.count_from_list(item_table, player) >= 1
-    for i in range (math.floor(total_chests * 0.25), total_chests):
-        multiworld.get_location(get_chest_string(i), player).access_rule = lambda state: state.count_from_list(item_table, player) >= 2
-    for i in range (math.floor(total_chests * 0.375), total_chests):
-        multiworld.get_location(get_chest_string(i), player).access_rule = lambda state: state.count_from_list(item_table, player) >= 3
-    
-    multiworld.get_location("The Old King", player).access_rule = lambda state: state.has("Old Crest", player)
-    multiworld.get_location("The Resourceful Rat", player).access_rule = lambda state: state.has("Gnawed Key", player)
-    multiworld.get_location("The Advanced Dragun", player).access_rule = lambda state: state.has("Weird Egg", player)
-    multiworld.get_location("The Lich", player).access_rule = lambda state: state.count_from_list(item_table, player) >= 3
-    """
+def set_rules(multiworld: MultiWorld, options: GungeonOptions, player,
+              area_connections: typing.Dict[int, int], area_cost_map: typing.Dict[int, int]):
+    # TODO (logic design): no location or goal-event access rules yet, so every check is in sphere 1.
+    # Earlier commented-out intent: Old King needs "Old Crest", Resourceful Rat needs "Gnawed Key",
+    # Advanced Dragun needs "Weird Egg", Lich needs some number of items.
 
-    "multiworld.completion_condition[player] = lambda state: has_completed_objectives(multiworld, options, player, state)"
+    required_events = get_required_goal_events(options)
+    multiworld.completion_condition[player] = \
+        lambda state: state.has_all(required_events, player)
