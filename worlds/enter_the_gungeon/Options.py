@@ -88,6 +88,16 @@ class SellCreepsFavorItem(DefaultOnToggle):
     """The Sell Creep only opens the grate to the R&G Dept. once you receive Sell Creep's Favor."""
     display_name = "Sell Creep's Favor"
 
+class AllowGlitchChestSkips(Toggle):
+    """Let Glitch Chests send you to the next floor even when its chamber is locked.
+    Off: a Glitch Chest opens like a normal chest while the next chamber is locked. Skips are never expected by logic."""
+    display_name = "Allow Glitch Chest Skips"
+
+class AllowTeleporterSkips(Toggle):
+    """Let the Teleporter Prototype warp you to a locked next floor, or to the Abbey without the Old Crest.
+    Off: those warps are removed from its random outcomes until you have access. Skips are never expected by logic."""
+    display_name = "Allow Teleporter Prototype Skips"
+
 class GunItems(Choice):
     """Amount of Guns in your item pool"""
     display_name = "Gun Pool Items"
@@ -152,7 +162,9 @@ gungeon_option_groups = [
     OptionGroup("Progression Options", [
        ChamberAccessLocks,
        BulletPartsAsItems,
-       SellCreepsFavorItem
+       SellCreepsFavorItem,
+       AllowGlitchChestSkips,
+       AllowTeleporterSkips
     ]),
     OptionGroup("Gungeon Item Pool Options", [
        GunItems,
@@ -184,6 +196,8 @@ gungeon_options_presets: Dict[str, Dict[str, Any]] = {
     "chamber_access_locks": ChamberAccessLocks.default,
     "bullet_parts": BulletPartsAsItems.default,
     "sell_creeps_favor": SellCreepsFavorItem.default,
+    "allow_glitch_chest_skips": AllowGlitchChestSkips.default,
+    "allow_teleporter_skips": AllowTeleporterSkips.default,
 
     "guns": GunItems.default,
     "passives": PassiveItems.default,
@@ -211,6 +225,8 @@ class GungeonOptions(PerGameCommonOptions):
     chamber_access_locks: ChamberAccessLocks
     bullet_parts: BulletPartsAsItems
     sell_creeps_favor: SellCreepsFavorItem
+    allow_glitch_chest_skips: AllowGlitchChestSkips
+    allow_teleporter_skips: AllowTeleporterSkips
 
     guns: GunItems
     passives: PassiveItems

@@ -71,6 +71,8 @@ class GungeonWorld(World):
             "ChamberAccessLocks": self.options.chamber_access_locks.value,
             "BulletParts": self.options.bullet_parts.value,
             "SellCreepsFavor": self.options.sell_creeps_favor.value,
+            "AllowGlitchChestSkips": self.options.allow_glitch_chest_skips.value,
+            "AllowTeleporterSkips": self.options.allow_teleporter_skips.value,
 
             "AchievementChecks": self.options.achievement_locations.value,
             "APItemChecks": self.options.ap_item_locations.value,
