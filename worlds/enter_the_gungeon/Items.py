@@ -168,6 +168,33 @@ unlock_item_table = {
     SELL_CREEPS_FAVOR: 8754321,
 }
 
+# Applied by the mod at the start of every run, for each copy received
+persistent_upgrade_counts = {
+    "Progressive Max Health": 3,
+    "Progressive Armor": 3,
+    "Progressive Blank": 3,
+    "Starting Casings": 4,
+    "Starting Key": 3,
+}
+
+persistent_upgrade_table = {
+    "Progressive Max Health": 8754600,
+    "Progressive Armor": 8754601,
+    "Progressive Blank": 8754602,
+    "Starting Casings": 8754603,
+    "Starting Key": 8754604,
+}
+
+
+def get_upgrade_item_names(options) -> list:
+    """Persistent upgrade items this slot puts in the pool, with repeats."""
+    names = []
+    if options.persistent_upgrades.value:
+        for name, count in persistent_upgrade_counts.items():
+            names += [name] * count
+    return names
+
+
 bullet_part_table = {
     "Prime Primer": 8754310,
     "Arcane Gunpowder": 8754311,
@@ -203,6 +230,7 @@ item_table.update(paradox_character_unlock_table)
 item_table.update(useful_item_table)
 item_table.update(unlock_item_table)
 item_table.update(bullet_part_table)
+item_table.update(persistent_upgrade_table)
 
 fill_item_table = {}
 fill_item_table.update(gun_item_table)

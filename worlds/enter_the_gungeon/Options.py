@@ -98,6 +98,22 @@ class AllowTeleporterSkips(Toggle):
     Off: those warps are removed from its random outcomes until you have access. Skips are never expected by logic."""
     display_name = "Allow Teleporter Prototype Skips"
 
+class BossChecks(DefaultOnToggle):
+    """Adds a check for the first kill of each boss: Bullet King, Gatling Gull, Trigger Twins, Ammoconda,
+    Beholster, Gorgun, Cannonbalrog, Treadnaught, Mine Flayer, Door Lord, Wallmonger, High Priest,
+    Kill Pillars, High Dragun, Advanced Dragun, Blobulord, Old King, Resourceful Rat, Agunim and the Lich."""
+    display_name = "Boss Checks"
+
+class EnemyKillChecks(DefaultOnToggle):
+    """Adds checks for total enemies killed across all runs. Short: 3, Standard: 6, Marathon: 10 checks,
+    following the Achievement Locations setting."""
+    display_name = "Enemy Kill Checks"
+
+class PersistentUpgrades(DefaultOnToggle):
+    """Adds permanent upgrades that apply at the start of every run: Progressive Max Health (x3),
+    Progressive Armor (x3), Progressive Blank (x3), Starting Casings (x4, 25 each) and Starting Key (x3)."""
+    display_name = "Persistent Upgrades"
+
 class GunItems(Choice):
     """Amount of Guns in your item pool"""
     display_name = "Gun Pool Items"
@@ -166,6 +182,11 @@ gungeon_option_groups = [
        AllowGlitchChestSkips,
        AllowTeleporterSkips
     ]),
+    OptionGroup("Extra Checks and Items", [
+       BossChecks,
+       EnemyKillChecks,
+       PersistentUpgrades
+    ]),
     OptionGroup("Gungeon Item Pool Options", [
        GunItems,
        PassiveItems,
@@ -230,6 +251,9 @@ class GungeonOptions(PerGameCommonOptions):
     sell_creeps_favor: SellCreepsFavorItem
     allow_glitch_chest_skips: AllowGlitchChestSkips
     allow_teleporter_skips: AllowTeleporterSkips
+    boss_checks: BossChecks
+    enemy_kill_checks: EnemyKillChecks
+    persistent_upgrades: PersistentUpgrades
 
     guns: GunItems
     passives: PassiveItems

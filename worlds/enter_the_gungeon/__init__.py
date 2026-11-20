@@ -1,7 +1,7 @@
 from typing import List
 from .Items import unlock_item_table, bullet_part_table
 from .Items import item_table, pickup_item_table, trap_item_table, GungeonItem, progression_item_table, fill_item_table
-from .Items import gun_item_table, passive_item_table, paradox_character_unlock_table, get_progression_item_names
+from .Items import gun_item_table, passive_item_table, paradox_character_unlock_table, get_progression_item_names, get_upgrade_item_names, persistent_upgrade_table
 from .Locations import location_table, GungeonLocation, LocationGeneration
 from .Options import GungeonOptions, gungeon_option_groups, gungeon_options_presets
 from .Rules import set_rules
@@ -12,7 +12,7 @@ from ..AutoWorld import World, WebWorld
 client_version = 1
 
 useful_names = {"Random A Tier Gun", "Random S Tier Gun", "Random A Tier Item", "Random S Tier Item",
-                "Reverse Curse Reversal"}
+                "Reverse Curse Reversal"} | set(persistent_upgrade_table)
 progression_names = set(progression_item_table) | set(unlock_item_table) | set(bullet_part_table) \
     | set(paradox_character_unlock_table)
 
@@ -75,11 +75,14 @@ class GungeonWorld(World):
             "SellCreepsFavor": self.options.sell_creeps_favor.value,
             "AllowGlitchChestSkips": self.options.allow_glitch_chest_skips.value,
             "AllowTeleporterSkips": self.options.allow_teleporter_skips.value,
+            "BossChecks": self.options.boss_checks.value,
+            "EnemyKillChecks": self.options.enemy_kill_checks.value,
+            "PersistentUpgrades": self.options.persistent_upgrades.value,
 
             "AchievementChecks": self.options.achievement_locations.value,
             "APItemChecks": self.options.ap_item_locations.value,
             "ExtraLocations": self.count_extra_locations(),
-            "APWorld": "0.3.0"
+            "APWorld": "0.4.0"
         }
 
     def count_extra_locations(self):
@@ -131,6 +134,10 @@ class GungeonWorld(World):
                                           item_table_list=gun_item_table)
         item_pool = self.create_item_pool(item_pool, amount_case=self.options.passives.value,
                                           item_table_list=passive_item_table)
+
+        "Persistent upgrades (applied every run) =========="
+        for upgrade_name in get_upgrade_item_names(self.options):
+            item_pool.append(self.create_useful_item(upgrade_name))
 
         "Progress items (key items, chamber access, bullet parts, Sell Creep's Favor, Paradox characters) ====="
         for progression_item_name in get_progression_item_names(self.options):

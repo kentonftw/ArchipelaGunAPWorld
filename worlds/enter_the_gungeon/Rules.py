@@ -12,7 +12,7 @@ Rule = typing.Callable[[CollectionState], bool]
 # Milestone checks that count up across every floor. With chamber locks on, the later checks of each kind
 # expect deeper chamber access, so they spread through the multiworld instead of all landing in sphere 1.
 # Every one of them is still physically possible earlier (by replaying the Keep), so this never soft-locks.
-SCALED_KINDS = ["Room Clear Points", "Chests Opened", "Cash Spent", "Gungeon AP Item"]
+SCALED_KINDS = ["Room Clear Points", "Chests Opened", "Cash Spent", "Gungeon AP Item", "Enemy Kills"]
 CHAMBER_COUNT = 5
 
 
@@ -109,6 +109,11 @@ def set_rules(multiworld: MultiWorld, options: GungeonOptions, player,
     location("Past Killed", characters(len(past_pool), past_pool))
     location("Base Secret Chamber Bosses", lambda state: True)  # Oubliette is open from the Keep
     location("Advanced Gungeon Bosses", can_reach_rat_lair)  # Rat's Lair also covers the Advanced Dragun
+
+    # Boss checks live in their floor's region; the Advanced Dragun also needs the Rat's Lair (or Weird Egg)
+    if options.boss_checks.value:
+        location("Defeat Advanced Dragun",
+                 lambda state: can_reach_rat_lair(state) or state.has("Weird Egg", player))
 
     required_events = get_required_goal_events(options)
     multiworld.completion_condition[player] = \

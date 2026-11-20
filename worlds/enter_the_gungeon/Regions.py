@@ -1,7 +1,8 @@
 import typing
 from BaseClasses import MultiWorld, Region, Entrance, Location
-from .Locations import GungeonLocation, location_table, event_location_table, LocationGeneration
-from .Items import ItemPoolGeneration, get_progression_item_names
+from .Locations import ENEMY_KILLS, enemy_kill_location_count, boss_location_table, boss_location_region,\
+     GungeonLocation, location_table, event_location_table, LocationGeneration
+from .Items import ItemPoolGeneration, get_progression_item_names, get_upgrade_item_names
 from .Options import GungeonOptions
 
 def get_gungeon_items_count(options: GungeonOptions):
@@ -13,6 +14,7 @@ def get_gungeon_items_count(options: GungeonOptions):
     item_count += ItemPoolGeneration.get_traps_count(options.traps.value)
 
     item_count += len(get_progression_item_names(options))
+    item_count += len(get_upgrade_item_names(options))
 
     if options.reverse_curse.value != 0:
         item_count += 8
@@ -23,6 +25,7 @@ def get_user_requested_locations_count(options: GungeonOptions):
     loc_count = 0
     loc_count += LocationGeneration.get_achievement_location_count(options.achievement_locations.value)
     loc_count += LocationGeneration.get_ap_item_location_count(options.ap_item_locations.value)
+    loc_count += len(get_extra_check_names(options))
 
     return loc_count
 
@@ -95,6 +98,17 @@ event_region = {
 }
 
 
+def get_extra_check_names(options: GungeonOptions) -> typing.List[str]:
+    """Boss and enemy-kill checks, when their options are on."""
+    names = []
+    if options.enemy_kill_checks.value:
+        count = enemy_kill_location_count[options.achievement_locations.value]
+        names += [f"{ENEMY_KILLS} {i + 1}" for i in range(count)]
+    if options.boss_checks.value:
+        names += list(boss_location_table)
+    return names
+
+
 def get_location_names(options: GungeonOptions) -> typing.List[str]:
     """All non-event location names this slot creates, including extra AP item locations."""
     names = []
@@ -105,6 +119,8 @@ def get_location_names(options: GungeonOptions) -> typing.List[str]:
     for name in LocationGeneration.location_id:
         count_list = ap_item_count_list if name == "Gungeon AP Item" else achievement_count_list
         names += [f"{name} {i + 1}" for i in range(count_list[name])]
+
+    names += get_extra_check_names(options)
 
     item_count = get_gungeon_items_count(options)
     location_count = get_user_requested_locations_count(options)
@@ -123,7 +139,8 @@ def create_regions(world: MultiWorld, options: GungeonOptions, player: int):
     regions = {name: Region(name, player, world) for name in region_names}
 
     for location_name in get_location_names(options):
-        region = regions[location_region.get(location_kind(location_name), KEEP)]
+        region_name = boss_location_region.get(location_name) or location_region.get(location_kind(location_name), KEEP)
+        region = regions[region_name]
         region.locations.append(GungeonLocation(player, location_name, location_table[location_name], region))
 
     for event_name, region_name in event_region.items():
