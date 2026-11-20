@@ -131,11 +131,24 @@ class LocationGeneration:
         return LocationGeneration.standard_location_count
 
 
+# When the item pool is bigger than the requested checks, Regions.fill_add_locations adds extra
+# "Gungeon AP Item N" locations numbered after the chosen AP item count. The largest pool (all
+# Marathon + every progression option + Reverse Curse) is 129 items against 33 Short achievement checks,
+# which needs names up to 96. 150 leaves headroom and stays below the next ID block (Room Clear Points, +200).
+MAX_AP_ITEM_LOCATIONS = 150
+assert LocationGeneration.location_id["Gungeon AP Item"] + MAX_AP_ITEM_LOCATIONS \
+    <= min(loc_id for name, loc_id in LocationGeneration.location_id.items() if name != "Gungeon AP Item")
+
+
 def fill_achievement_locations():
     name_list = LocationGeneration.location_id.keys()
 
     for name in name_list:
-        for i in range(0, LocationGeneration.marathon_location_count[name]):
+        count = LocationGeneration.marathon_location_count[name]
+        if name == "Gungeon AP Item":
+            count = MAX_AP_ITEM_LOCATIONS
+
+        for i in range(0, count):
             location_table.update({f"{name} {i + 1}": LocationGeneration.location_id[name] + i})
 
     return

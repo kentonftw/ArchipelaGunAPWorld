@@ -1,7 +1,7 @@
 import typing
 from dataclasses import dataclass
 from typing import Dict, Any
-from Options import Option, Choice, DeathLink, Range, Toggle, PerGameCommonOptions, OptionGroup, OptionSet
+from Options import Option, Choice, DeathLink, DefaultOnToggle, Range, Toggle, PerGameCommonOptions, OptionGroup, OptionSet
 
 # https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/options%20api.md
 
@@ -47,8 +47,8 @@ class FarewellToArmsBosses(Choice):
     """Require bosses from the Farewell To Arms Update (Cam Clarke AS Agunim) for completion
     [Paradox Lich currently WIP]"""
     display_name = "Farewell To Arms Bosses"
-    option_required = 0
-    option_optional = 1
+    option_required = 1
+    option_optional = 0
     default = 0
 
 class RandomizeEnemies(Choice):
@@ -73,6 +73,30 @@ class ReverseCurseMode(Choice):
     option_standard = 1
     option_hard = 2
     default = 1
+
+class ChamberAccessLocks(DefaultOnToggle):
+    """Lock each elevator down to the next chamber until you receive a Progressive Chamber Access item.
+    Adds 4 Progressive Chamber Access items to the pool."""
+    display_name = "Chamber Access Locks"
+
+class BulletPartsAsItems(DefaultOnToggle):
+    """The four parts of the Bullet That Can Kill The Past (Prime Primer, Arcane Gunpowder, Planar Lead,
+    Obsidian Shell Casing) become randomizer items. The Blacksmith only builds the Bullet once all four are received."""
+    display_name = "Bullet Parts As Items"
+
+class SellCreepsFavorItem(DefaultOnToggle):
+    """The Sell Creep only opens the grate to the R&G Dept. once you receive Sell Creep's Favor."""
+    display_name = "Sell Creep's Favor"
+
+class AllowGlitchChestSkips(Toggle):
+    """Let Glitch Chests send you to the next floor even when its chamber is locked.
+    Off: a Glitch Chest opens like a normal chest while the next chamber is locked. Skips are never expected by logic."""
+    display_name = "Allow Glitch Chest Skips"
+
+class AllowTeleporterSkips(Toggle):
+    """Let the Teleporter Prototype warp you to a locked next floor, or to the Abbey without the Old Crest.
+    Off: those warps are removed from its random outcomes until you have access. Skips are never expected by logic."""
+    display_name = "Allow Teleporter Prototype Skips"
 
 class GunItems(Choice):
     """Amount of Guns in your item pool"""
@@ -135,6 +159,13 @@ gungeon_option_groups = [
        RandomizeEnemies,
        ReverseCurseMode
     ]),
+    OptionGroup("Progression Options", [
+       ChamberAccessLocks,
+       BulletPartsAsItems,
+       SellCreepsFavorItem,
+       AllowGlitchChestSkips,
+       AllowTeleporterSkips
+    ]),
     OptionGroup("Gungeon Item Pool Options", [
        GunItems,
        PassiveItems,
@@ -150,25 +181,34 @@ gungeon_option_groups = [
 ]
 
 gungeon_options_presets: Dict[str, Dict[str, Any]] = {
-    "dragun": DragunGoal.default,
-    "past_kills": KillThePastGoal.default,
-    "lich": LichGoal.default,
-    "base_secret_chamber": BaseSecretChamberBosses.default,
-    "advanced_gungeon": AdvancedGungeonDragunsBosses.default,
-    "farewell_arms": FarewellToArmsBosses.default,
-
-    "paradox_mode": ParadoxMode.default,
-    "random_enemies": RandomizeEnemies.default,
-    "death_link": DeathLink.default,
-    "reverse_curse": ReverseCurseMode.default,
-
-    "guns": GunItems.default,
-    "passives": PassiveItems.default,
-    "traps": TrapItems.default,
-    "consumable": ConsumableItems.default,
-
-    "achievement_locations": AchievementLocationChecks.default,
-    "ap_item_locations": APItemLocationChecks.default
+    "Quick Run": {
+        "dragun": DragunGoal.option_required,
+        "past_kills": KillThePastGoal.option_optional,
+        "lich": LichGoal.option_optional,
+        "base_secret_chamber": BaseSecretChamberBosses.option_optional,
+        "advanced_gungeon": AdvancedGungeonDragunsBosses.option_optional,
+        "farewell_arms": FarewellToArmsBosses.option_optional,
+        "guns": GunItems.option_short,
+        "passives": PassiveItems.option_short,
+        "traps": TrapItems.option_short,
+        "consumable": ConsumableItems.option_short,
+        "achievement_locations": AchievementLocationChecks.option_short,
+        "ap_item_locations": APItemLocationChecks.option_short,
+    },
+    "Marathon": {
+        "dragun": DragunGoal.option_required,
+        "past_kills": KillThePastGoal.option_all_pasts,
+        "lich": LichGoal.option_required,
+        "base_secret_chamber": BaseSecretChamberBosses.option_required,
+        "advanced_gungeon": AdvancedGungeonDragunsBosses.option_required,
+        "farewell_arms": FarewellToArmsBosses.option_required,
+        "guns": GunItems.option_marathon,
+        "passives": PassiveItems.option_marathon,
+        "traps": TrapItems.option_marathon,
+        "consumable": ConsumableItems.option_marathon,
+        "achievement_locations": AchievementLocationChecks.option_marathon,
+        "ap_item_locations": APItemLocationChecks.option_marathon,
+    },
 }
 
 @dataclass
@@ -184,6 +224,12 @@ class GungeonOptions(PerGameCommonOptions):
     random_enemies: RandomizeEnemies
     death_link: DeathLink
     reverse_curse: ReverseCurseMode
+
+    chamber_access_locks: ChamberAccessLocks
+    bullet_parts: BulletPartsAsItems
+    sell_creeps_favor: SellCreepsFavorItem
+    allow_glitch_chest_skips: AllowGlitchChestSkips
+    allow_teleporter_skips: AllowTeleporterSkips
 
     guns: GunItems
     passives: PassiveItems

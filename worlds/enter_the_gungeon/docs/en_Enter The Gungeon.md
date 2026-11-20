@@ -13,7 +13,13 @@ Items received in Gungeon are randomized by rarity.
 To defeat all Enter the Gungeon bosses marked in options. These can include: Lich, Dragun, Character Pasts, secret chamber bosses.
 
 ## Which items can be in another player's world?
-Gungeon items randomized in rarity tiers, Character unlocks for Paradox Mode, Curse lowering for Reverse Curse Mode
+Gungeon items randomized in rarity tiers, Character unlocks for Paradox Mode, Curse lowering for Reverse Curse Mode.
+
+Progression items, each of which can be turned off in the options:
+- Progressive Chamber Access (x4): each one unlocks the elevator down to the next chamber
+- Bullet That Can Kill The Past parts: Prime Primer, Arcane Gunpowder, Planar Lead, Obsidian Shell Casing
+- Sell Creep's Favor: the Sell Creep opens the grate to the R&G Dept.
+- Old Crest, Gnawed Key and Weird Egg open the Abbey, the Resourceful Rat's Lair and the Advanced Dragun
 
 ## What does another world's item look like in Enter The Gungeon?
 APItem in chests & messages through client. WIP for in-engine messages.

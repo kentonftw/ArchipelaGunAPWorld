@@ -159,6 +159,41 @@ useful_item_table = {
     "Reverse Curse Reversal": 8754500
 }
 
+CHAMBER_ACCESS = "Progressive Chamber Access"
+CHAMBER_ACCESS_COUNT = 4  # one per elevator: Chamber 2 to Chamber 5
+SELL_CREEPS_FAVOR = "Sell Creep's Favor"
+
+unlock_item_table = {
+    CHAMBER_ACCESS: 8754320,
+    SELL_CREEPS_FAVOR: 8754321,
+}
+
+bullet_part_table = {
+    "Prime Primer": 8754310,
+    "Arcane Gunpowder": 8754311,
+    "Planar Lead": 8754312,
+    "Obsidian Shell Casing": 8754313,
+}
+
+base_character_items = ["Marine Paradox", "Convict Paradox", "Pilot Paradox", "Hunter Paradox"]
+all_character_items = list(paradox_character_unlock_table)
+
+
+def get_progression_item_names(options) -> list:
+    """Every progression item this slot puts in the pool, with repeats. Used for both creation and counting."""
+    names = list(progression_item_table)
+
+    if options.chamber_access_locks.value:
+        names += [CHAMBER_ACCESS] * CHAMBER_ACCESS_COUNT
+    if options.bullet_parts.value:
+        names += list(bullet_part_table)
+    if options.sell_creeps_favor.value:
+        names.append(SELL_CREEPS_FAVOR)
+    if options.paradox_mode.value == 1:
+        names += all_character_items
+
+    return names
+
 item_table.update(gun_item_table)
 item_table.update(passive_item_table)
 item_table.update(pickup_item_table)
@@ -166,6 +201,8 @@ item_table.update(trap_item_table)
 item_table.update(progression_item_table)
 item_table.update(paradox_character_unlock_table)
 item_table.update(useful_item_table)
+item_table.update(unlock_item_table)
+item_table.update(bullet_part_table)
 
 fill_item_table = {}
 fill_item_table.update(gun_item_table)

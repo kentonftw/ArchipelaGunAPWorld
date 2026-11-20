@@ -1,6 +1,7 @@
 from typing import List
+from .Items import unlock_item_table, bullet_part_table
 from .Items import item_table, pickup_item_table, trap_item_table, GungeonItem, progression_item_table, fill_item_table
-from .Items import gun_item_table, passive_item_table, paradox_character_unlock_table
+from .Items import gun_item_table, passive_item_table, paradox_character_unlock_table, get_progression_item_names
 from .Locations import location_table, GungeonLocation, LocationGeneration
 from .Options import GungeonOptions, gungeon_option_groups, gungeon_options_presets
 from .Rules import set_rules
@@ -9,6 +10,11 @@ from BaseClasses import Item, ItemClassification, MultiWorld, Tutorial
 from ..AutoWorld import World, WebWorld
 
 client_version = 1
+
+useful_names = {"Random A Tier Gun", "Random S Tier Gun", "Random A Tier Item", "Random S Tier Item",
+                "Reverse Curse Reversal"}
+progression_names = set(progression_item_table) | set(unlock_item_table) | set(bullet_part_table) \
+    | set(paradox_character_unlock_table)
 
 
 class GungeonWeb(WebWorld):
@@ -64,10 +70,16 @@ class GungeonWorld(World):
             "DeathLink": self.options.death_link.value,
             "RandomEnemies": self.options.random_enemies.value,
             "ReverseCurse": self.options.reverse_curse.value,
+            "ChamberAccessLocks": self.options.chamber_access_locks.value,
+            "BulletParts": self.options.bullet_parts.value,
+            "SellCreepsFavor": self.options.sell_creeps_favor.value,
+            "AllowGlitchChestSkips": self.options.allow_glitch_chest_skips.value,
+            "AllowTeleporterSkips": self.options.allow_teleporter_skips.value,
 
             "AchievementChecks": self.options.achievement_locations.value,
             "APItemChecks": self.options.ap_item_locations.value,
-            "ExtraLocations": self.count_extra_locations()
+            "ExtraLocations": self.count_extra_locations(),
+            "APWorld": "0.3.0"
         }
 
     def count_extra_locations(self):
@@ -89,7 +101,16 @@ class GungeonWorld(World):
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.area_cost_map)
 
     def create_item(self, name: str) -> Item:
+        if name in progression_names:
+            return self.create_progress_item(name)
+        if name in useful_names:
+            return self.create_useful_item(name)
+        if name in trap_item_table:
+            return self.create_trap_item(name)
         return GungeonItem(name, ItemClassification.filler, item_table[name], self.player)
+
+    def get_filler_item_name(self) -> str:
+        return self.random.choice(list(pickup_item_table))
 
     def create_progress_item(self, name: str) -> Item:
         return GungeonItem(name, ItemClassification.progression, item_table[name], self.player)
@@ -111,26 +132,23 @@ class GungeonWorld(World):
         item_pool = self.create_item_pool(item_pool, amount_case=self.options.passives.value,
                                           item_table_list=passive_item_table)
 
-        "Progress items =============================="
-        for progression_item_name, itemID in progression_item_table.items():
+        "Progress items (key items, chamber access, bullet parts, Sell Creep's Favor, Paradox characters) ====="
+        for progression_item_name in get_progression_item_names(self.options):
             item_pool.append(self.create_progress_item(progression_item_name))
 
         consumables_count = Items.ItemPoolGeneration.get_consumables_count(self.options.consumable.value)
         "Consumables items =============================="
+        consumable_names = list(pickup_item_table)
+        self.random.shuffle(consumable_names)
         for i in range(0, consumables_count):
-            item_pool.append(self.create_item(list(pickup_item_table)[i % len(pickup_item_table)]))
+            item_pool.append(self.create_item(consumable_names[i % len(consumable_names)]))
 
-        trap_count = Items.ItemPoolGeneration.get_consumables_count(self.options.traps.value)
+        trap_count = Items.ItemPoolGeneration.get_traps_count(self.options.traps.value)
         "Traps =============================="
+        trap_names = list(trap_item_table)
+        self.random.shuffle(trap_names)
         for i in range(0, trap_count):
-            item_pool.append(self.create_trap_item(list(trap_item_table)[i % len(trap_item_table)]))
-
-        "Paradox Mode =============================="
-        if self.options.paradox_mode.value == 1:
-            name_list = paradox_character_unlock_table.keys()
-
-            for character_name in name_list:
-                item_pool.append(self.create_progress_item(character_name))
+            item_pool.append(self.create_trap_item(trap_names[i % len(trap_names)]))
 
         "Reverse Curse =============================="
         if self.options.reverse_curse.value != 0:
@@ -149,13 +167,9 @@ class GungeonWorld(World):
         self.multiworld.itempool += item_pool
 
     def create_fill_items(self, item_pool, amount_to_fill=10):
+        fill_names = list(fill_item_table)
         for i in range(0, amount_to_fill):
-            item_name = list(fill_item_table)[i % len(fill_item_table)]
-
-            if "Trap" in item_name:
-                item_pool.append(self.create_trap_item(item_name))
-            else:
-                item_pool.append(self.create_item(item_name))
+            item_pool.append(self.create_item(self.random.choice(fill_names)))
 
         return item_pool
 
