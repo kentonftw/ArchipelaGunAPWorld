@@ -47,8 +47,8 @@ class FarewellToArmsBosses(Choice):
     """Require bosses from the Farewell To Arms Update (Cam Clarke AS Agunim) for completion
     [Paradox Lich currently WIP]"""
     display_name = "Farewell To Arms Bosses"
-    option_required = 0
-    option_optional = 1
+    option_required = 1
+    option_optional = 0
     default = 0
 
 class RandomizeEnemies(Choice):
@@ -181,31 +181,34 @@ gungeon_option_groups = [
 ]
 
 gungeon_options_presets: Dict[str, Dict[str, Any]] = {
-    "dragun": DragunGoal.default,
-    "past_kills": KillThePastGoal.default,
-    "lich": LichGoal.default,
-    "base_secret_chamber": BaseSecretChamberBosses.default,
-    "advanced_gungeon": AdvancedGungeonDragunsBosses.default,
-    "farewell_arms": FarewellToArmsBosses.default,
-
-    "paradox_mode": ParadoxMode.default,
-    "random_enemies": RandomizeEnemies.default,
-    "death_link": DeathLink.default,
-    "reverse_curse": ReverseCurseMode.default,
-
-    "chamber_access_locks": ChamberAccessLocks.default,
-    "bullet_parts": BulletPartsAsItems.default,
-    "sell_creeps_favor": SellCreepsFavorItem.default,
-    "allow_glitch_chest_skips": AllowGlitchChestSkips.default,
-    "allow_teleporter_skips": AllowTeleporterSkips.default,
-
-    "guns": GunItems.default,
-    "passives": PassiveItems.default,
-    "traps": TrapItems.default,
-    "consumable": ConsumableItems.default,
-
-    "achievement_locations": AchievementLocationChecks.default,
-    "ap_item_locations": APItemLocationChecks.default
+    "Quick Run": {
+        "dragun": DragunGoal.option_required,
+        "past_kills": KillThePastGoal.option_optional,
+        "lich": LichGoal.option_optional,
+        "base_secret_chamber": BaseSecretChamberBosses.option_optional,
+        "advanced_gungeon": AdvancedGungeonDragunsBosses.option_optional,
+        "farewell_arms": FarewellToArmsBosses.option_optional,
+        "guns": GunItems.option_short,
+        "passives": PassiveItems.option_short,
+        "traps": TrapItems.option_short,
+        "consumable": ConsumableItems.option_short,
+        "achievement_locations": AchievementLocationChecks.option_short,
+        "ap_item_locations": APItemLocationChecks.option_short,
+    },
+    "Marathon": {
+        "dragun": DragunGoal.option_required,
+        "past_kills": KillThePastGoal.option_all_pasts,
+        "lich": LichGoal.option_required,
+        "base_secret_chamber": BaseSecretChamberBosses.option_required,
+        "advanced_gungeon": AdvancedGungeonDragunsBosses.option_required,
+        "farewell_arms": FarewellToArmsBosses.option_required,
+        "guns": GunItems.option_marathon,
+        "passives": PassiveItems.option_marathon,
+        "traps": TrapItems.option_marathon,
+        "consumable": ConsumableItems.option_marathon,
+        "achievement_locations": AchievementLocationChecks.option_marathon,
+        "ap_item_locations": APItemLocationChecks.option_marathon,
+    },
 }
 
 @dataclass

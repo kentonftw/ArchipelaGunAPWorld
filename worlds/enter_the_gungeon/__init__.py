@@ -11,6 +11,8 @@ from ..AutoWorld import World, WebWorld
 
 client_version = 1
 
+useful_names = {"Random A Tier Gun", "Random S Tier Gun", "Random A Tier Item", "Random S Tier Item",
+                "Reverse Curse Reversal"}
 progression_names = set(progression_item_table) | set(unlock_item_table) | set(bullet_part_table) \
     | set(paradox_character_unlock_table)
 
@@ -101,7 +103,14 @@ class GungeonWorld(World):
     def create_item(self, name: str) -> Item:
         if name in progression_names:
             return self.create_progress_item(name)
+        if name in useful_names:
+            return self.create_useful_item(name)
+        if name in trap_item_table:
+            return self.create_trap_item(name)
         return GungeonItem(name, ItemClassification.filler, item_table[name], self.player)
+
+    def get_filler_item_name(self) -> str:
+        return self.random.choice(list(pickup_item_table))
 
     def create_progress_item(self, name: str) -> Item:
         return GungeonItem(name, ItemClassification.progression, item_table[name], self.player)
@@ -129,13 +138,17 @@ class GungeonWorld(World):
 
         consumables_count = Items.ItemPoolGeneration.get_consumables_count(self.options.consumable.value)
         "Consumables items =============================="
+        consumable_names = list(pickup_item_table)
+        self.random.shuffle(consumable_names)
         for i in range(0, consumables_count):
-            item_pool.append(self.create_item(list(pickup_item_table)[i % len(pickup_item_table)]))
+            item_pool.append(self.create_item(consumable_names[i % len(consumable_names)]))
 
         trap_count = Items.ItemPoolGeneration.get_traps_count(self.options.traps.value)
         "Traps =============================="
+        trap_names = list(trap_item_table)
+        self.random.shuffle(trap_names)
         for i in range(0, trap_count):
-            item_pool.append(self.create_trap_item(list(trap_item_table)[i % len(trap_item_table)]))
+            item_pool.append(self.create_trap_item(trap_names[i % len(trap_names)]))
 
         "Reverse Curse =============================="
         if self.options.reverse_curse.value != 0:
@@ -154,13 +167,9 @@ class GungeonWorld(World):
         self.multiworld.itempool += item_pool
 
     def create_fill_items(self, item_pool, amount_to_fill=10):
+        fill_names = list(fill_item_table)
         for i in range(0, amount_to_fill):
-            item_name = list(fill_item_table)[i % len(fill_item_table)]
-
-            if "Trap" in item_name:
-                item_pool.append(self.create_trap_item(item_name))
-            else:
-                item_pool.append(self.create_item(item_name))
+            item_pool.append(self.create_item(self.random.choice(fill_names)))
 
         return item_pool
 

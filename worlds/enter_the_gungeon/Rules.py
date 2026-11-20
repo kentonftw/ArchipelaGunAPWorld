@@ -30,7 +30,6 @@ def get_required_goal_events(options: GungeonOptions) -> typing.List[str]:
         required.append("Base Secret Chamber Bosses")
     if options.advanced_gungeon.value == AdvancedGungeonDragunsBosses.option_required:
         required.append("Advanced Gungeon Bosses")
-    # Note: this option's values are inverted compared to the others (required = 0, optional = 1).
     if options.farewell_arms.value == FarewellToArmsBosses.option_required:
         required.append("Farewell To Arms Bosses")
 
