@@ -77,8 +77,9 @@ def set_rules(multiworld: MultiWorld, options: GungeonOptions, player,
     # Secret floors. The Oubliette keeps its vanilla in-run requirements (water + 2 keys), so no item gate.
     entrance(PROPER, ABBEY, lambda state: state.has("Old Crest", player))
     entrance(MINE, RAT_LAIR, lambda state: state.has("Gnawed Key", player))
-    if favor:
-        entrance(HOLLOW, RG_DEPT, lambda state: state.has(SELL_CREEPS_FAVOR, player))
+    # The R&G Dept. drops you straight into the Forge (no elevator), so the mod also requires Forge access.
+    entrance(HOLLOW, RG_DEPT,
+             lambda state: chamber(5)(state) and (not favor or state.has(SELL_CREEPS_FAVOR, player)))
 
     # Pasts need the Bullet That Can Kill The Past and at least one character who has a past.
     entrance(FORGE, PASTS, lambda state: has_bullet(state) and characters(1)(state))
