@@ -1,7 +1,7 @@
 import typing
 from dataclasses import dataclass
 from typing import Dict, Any
-from Options import Option, Choice, DeathLink, Range, Toggle, PerGameCommonOptions, OptionGroup, OptionSet
+from Options import Option, Choice, DeathLink, DefaultOnToggle, Range, Toggle, PerGameCommonOptions, OptionGroup, OptionSet
 
 # https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/options%20api.md
 
@@ -74,6 +74,20 @@ class ReverseCurseMode(Choice):
     option_hard = 2
     default = 1
 
+class ChamberAccessLocks(DefaultOnToggle):
+    """Lock each elevator down to the next chamber until you receive a Progressive Chamber Access item.
+    Adds 4 Progressive Chamber Access items to the pool."""
+    display_name = "Chamber Access Locks"
+
+class BulletPartsAsItems(DefaultOnToggle):
+    """The four parts of the Bullet That Can Kill The Past (Prime Primer, Arcane Gunpowder, Planar Lead,
+    Obsidian Shell Casing) become randomizer items. The Blacksmith only builds the Bullet once all four are received."""
+    display_name = "Bullet Parts As Items"
+
+class SellCreepsFavorItem(DefaultOnToggle):
+    """The Sell Creep only opens the grate to the R&G Dept. once you receive Sell Creep's Favor."""
+    display_name = "Sell Creep's Favor"
+
 class GunItems(Choice):
     """Amount of Guns in your item pool"""
     display_name = "Gun Pool Items"
@@ -135,6 +149,11 @@ gungeon_option_groups = [
        RandomizeEnemies,
        ReverseCurseMode
     ]),
+    OptionGroup("Progression Options", [
+       ChamberAccessLocks,
+       BulletPartsAsItems,
+       SellCreepsFavorItem
+    ]),
     OptionGroup("Gungeon Item Pool Options", [
        GunItems,
        PassiveItems,
@@ -162,6 +181,10 @@ gungeon_options_presets: Dict[str, Dict[str, Any]] = {
     "death_link": DeathLink.default,
     "reverse_curse": ReverseCurseMode.default,
 
+    "chamber_access_locks": ChamberAccessLocks.default,
+    "bullet_parts": BulletPartsAsItems.default,
+    "sell_creeps_favor": SellCreepsFavorItem.default,
+
     "guns": GunItems.default,
     "passives": PassiveItems.default,
     "traps": TrapItems.default,
@@ -184,6 +207,10 @@ class GungeonOptions(PerGameCommonOptions):
     random_enemies: RandomizeEnemies
     death_link: DeathLink
     reverse_curse: ReverseCurseMode
+
+    chamber_access_locks: ChamberAccessLocks
+    bullet_parts: BulletPartsAsItems
+    sell_creeps_favor: SellCreepsFavorItem
 
     guns: GunItems
     passives: PassiveItems

@@ -1,7 +1,7 @@
 import typing
 from BaseClasses import MultiWorld, Region, Entrance, Location
 from .Locations import GungeonLocation, location_table, event_location_table, LocationGeneration
-from .Items import progression_item_table, ItemPoolGeneration
+from .Items import ItemPoolGeneration, get_progression_item_names
 from .Options import GungeonOptions
 
 def get_gungeon_items_count(options: GungeonOptions):
@@ -12,9 +12,7 @@ def get_gungeon_items_count(options: GungeonOptions):
     item_count += ItemPoolGeneration.get_consumables_count(options.consumable.value)
     item_count += ItemPoolGeneration.get_traps_count(options.traps.value)
 
-    if options.paradox_mode.value == 1:
-        item_count += 6
-    item_count += len(progression_item_table)
+    item_count += len(get_progression_item_names(options))
 
     if options.reverse_curse.value != 0:
         item_count += 8
@@ -43,39 +41,96 @@ def fill_add_locations(amount: 10, item_case: 1):
     return loc_name_list
 
 
-def create_regions(world: MultiWorld, options: GungeonOptions, player: int):
-    region = Region("Menu", player, world, "")
+# Region graph. Each tuple is (from, to); entrance rules are set in Rules.set_rules.
+MENU = "Menu"
+KEEP = "Keep of the Lead Lord"
+PROPER = "Gungeon Proper"
+MINE = "Black Powder Mine"
+HOLLOW = "Hollow"
+FORGE = "Forge"
+OUBLIETTE = "Oubliette"
+ABBEY = "Abbey of the True Gun"
+RAT_LAIR = "Resourceful Rat's Lair"
+RG_DEPT = "R&G Dept."
+PASTS = "Character Pasts"
+BULLET_HELL = "Bullet Hell"
+
+region_names = [MENU, KEEP, PROPER, MINE, HOLLOW, FORGE, OUBLIETTE, ABBEY, RAT_LAIR, RG_DEPT, PASTS, BULLET_HELL]
+
+connections = [
+    (MENU, KEEP),
+    (KEEP, PROPER), (PROPER, MINE), (MINE, HOLLOW), (HOLLOW, FORGE),
+    (KEEP, OUBLIETTE), (PROPER, ABBEY), (MINE, RAT_LAIR), (HOLLOW, RG_DEPT),
+    (FORGE, PASTS), (PASTS, BULLET_HELL),
+]
+
+
+def entrance_name(source: str, target: str) -> str:
+    return f"{source} -> {target}"
+
+
+# Which region each kind of milestone check lives in. Checks not listed here (room clears, chests,
+# cash spent, AP items) count up across all floors, so they live in the Keep and get scaled rules.
+location_region = {
+    "Floor 1 Clears": KEEP,
+    "Floor 2 Clears": PROPER,
+    "Floor 3 Clears": MINE,
+    "Floor 4 Clears": HOLLOW,
+    "Floor 5 Clears": FORGE,
+    "Oubliette Clears": OUBLIETTE,
+    "Abbey Clears": ABBEY,
+    "Resourceful Rat Lair Clears": RAT_LAIR,
+    "R&D Department Clears": RG_DEPT,
+    "Past Clears": PASTS,
+    "Bullet Hell Clears": BULLET_HELL,
+}
+
+event_region = {
+    "The High Dragun": FORGE,
+    "The Lich": BULLET_HELL,
+    "Base Secret Chamber Bosses": ABBEY,
+    "Past Killed": PASTS,
+    "Advanced Gungeon Bosses": FORGE,
+    "Farewell To Arms Bosses": RG_DEPT,
+}
+
+
+def get_location_names(options: GungeonOptions) -> typing.List[str]:
+    """All non-event location names this slot creates, including extra AP item locations."""
+    names = []
+
+    achievement_count_list = LocationGeneration.get_location_count_list(options.achievement_locations.value)
+    ap_item_count_list = LocationGeneration.get_location_count_list(options.ap_item_locations.value)
+
+    for name in LocationGeneration.location_id:
+        count_list = ap_item_count_list if name == "Gungeon AP Item" else achievement_count_list
+        names += [f"{name} {i + 1}" for i in range(count_list[name])]
 
     item_count = get_gungeon_items_count(options)
     location_count = get_user_requested_locations_count(options)
-
     if item_count > location_count:
-        locations_to_fill = item_count - location_count
-        fill_name_list = fill_add_locations(locations_to_fill, options.ap_item_locations.value)
+        names += fill_add_locations(item_count - location_count, options.ap_item_locations.value)
 
-        for location_name in fill_name_list:
-            region.locations.append(GungeonLocation(player, location_name, location_table[location_name], region))
+    return names
 
-    ap_item_location_checks_option = options.ap_item_locations.value
-    ap_item_location_count_list = LocationGeneration.get_location_count_list(ap_item_location_checks_option)
 
-    achievement_locations_option = options.achievement_locations.value
-    achievement_count_list = LocationGeneration.get_location_count_list(achievement_locations_option)
+def location_kind(location_name: str) -> str:
+    """'Floor 2 Clears 3' -> 'Floor 2 Clears'"""
+    return location_name.rsplit(" ", 1)[0]
 
-    name_list = LocationGeneration.location_id.keys()
 
-    for name in name_list:
-        if name != "Gungeon AP Item":
-            for i in range(0, achievement_count_list[name]):
-                loc_name = f"{name} {i + 1}"
-                region.locations.append(GungeonLocation(player, loc_name, location_table[loc_name], region))
-        else:
-            for i in range(0, ap_item_location_count_list[name]):
-                loc_name = f"{name} {i + 1}"
-                region.locations.append(GungeonLocation(player, loc_name, location_table[loc_name], region))
+def create_regions(world: MultiWorld, options: GungeonOptions, player: int):
+    regions = {name: Region(name, player, world) for name in region_names}
 
-    # Add event locations
-    for name in event_location_table:
-        region.locations.append(GungeonLocation(player, name, None, region))
+    for location_name in get_location_names(options):
+        region = regions[location_region.get(location_kind(location_name), KEEP)]
+        region.locations.append(GungeonLocation(player, location_name, location_table[location_name], region))
 
-    world.regions.append(region)
+    for event_name, region_name in event_region.items():
+        region = regions[region_name]
+        region.locations.append(GungeonLocation(player, event_name, None, region))
+
+    for source, target in connections:
+        regions[source].connect(regions[target], entrance_name(source, target))
+
+    world.regions += regions.values()
