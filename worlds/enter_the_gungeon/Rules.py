@@ -3,7 +3,8 @@ from BaseClasses import CollectionState, MultiWorld
 from .Options import (GungeonOptions, DragunGoal, LichGoal, KillThePastGoal, BaseSecretChamberBosses,
                       AdvancedGungeonDragunsBosses, FarewellToArmsBosses)
 from .Items import (CHAMBER_ACCESS, SELL_CREEPS_FAVOR, bullet_part_table, base_character_items,
-                    all_character_items)
+                    all_character_items, ARCHIPELAGO_TOKEN, power_item_names)
+from .Locations import boss_location_table
 from .Regions import (KEEP, PROPER, MINE, HOLLOW, FORGE, ABBEY, RAT_LAIR, RG_DEPT, PASTS, BULLET_HELL,
                       entrance_name, location_kind)
 
@@ -43,11 +44,24 @@ def set_rules(multiworld: MultiWorld, options: GungeonOptions, player,
     favor = bool(options.sell_creeps_favor.value)
     paradox = options.paradox_mode.value == 1
 
-    def chamber(n: int) -> Rule:
-        """Can reach chamber n (1 = Keep). Needs n - 1 Progressive Chamber Access when locks are on."""
-        if not locks or n <= 1:
+    # Power Logic: how many A/S guns, A/S passives and rare actives to expect before chambers 4 and 5
+    power_needed = {0: {}, 1: {4: 2, 5: 4}, 2: {4: 3, 5: 6}}[options.power_logic.value]
+
+    def power(n: int) -> Rule:
+        needed = power_needed.get(n, 0)
+        if needed <= 0:
             return lambda state: True
-        return lambda state: state.has(CHAMBER_ACCESS, player, n - 1)
+        return lambda state: state.has_from_list(power_item_names, player, needed)
+
+    def chamber(n: int) -> Rule:
+        """Can reach chamber n (1 = Keep). Needs n - 1 Progressive Chamber Access when locks are on,
+        plus enough good items with Power Logic."""
+        if n <= 1:
+            return lambda state: True
+        strong = power(n)
+        if not locks:
+            return strong
+        return lambda state: state.has(CHAMBER_ACCESS, player, n - 1) and strong(state)
 
     def has_bullet(state: CollectionState) -> bool:
         return not parts or state.has_all(bullet_part_table, player)
@@ -116,5 +130,21 @@ def set_rules(multiworld: MultiWorld, options: GungeonOptions, player,
                  lambda state: can_reach_rat_lair(state) or state.has("Weird Egg", player))
 
     required_events = get_required_goal_events(options)
+    tokens = options.tokens_required.value
+    bosses = options.boss_hunt.value
+    boss_names = list(boss_location_table)
+
+    def boss_hunt_done(state: CollectionState) -> bool:
+        if bosses <= 0:
+            return True
+        reached = 0
+        for name in boss_names:
+            if state.can_reach_location(name, player):
+                reached += 1
+                if reached >= bosses:
+                    return True
+        return False
+
     multiworld.completion_condition[player] = \
-        lambda state: state.has_all(required_events, player)
+        lambda state: state.has_all(required_events, player) and state.has(ARCHIPELAGO_TOKEN, player, tokens) \
+        and boss_hunt_done(state)

@@ -1,5 +1,6 @@
 import typing
 from BaseClasses import MultiWorld, Region, Entrance, Location
+from .Locations import master_round_table, master_round_region, shrine_table, npc_rescue_table
 from .Locations import ENEMY_KILLS, enemy_kill_location_count, boss_location_table, boss_location_region,\
      GungeonLocation, location_table, event_location_table, LocationGeneration
 from .Items import ItemPoolGeneration, get_progression_item_names, get_upgrade_item_names
@@ -106,6 +107,12 @@ def get_extra_check_names(options: GungeonOptions) -> typing.List[str]:
         names += [f"{ENEMY_KILLS} {i + 1}" for i in range(count)]
     if options.boss_checks.value:
         names += list(boss_location_table)
+    if options.master_round_checks.value:
+        names += list(master_round_table)
+    if options.shrine_checks.value:
+        names += list(shrine_table)
+    if options.npc_rescue_checks.value:
+        names += list(npc_rescue_table)
     return names
 
 
@@ -139,7 +146,9 @@ def create_regions(world: MultiWorld, options: GungeonOptions, player: int):
     regions = {name: Region(name, player, world) for name in region_names}
 
     for location_name in get_location_names(options):
-        region_name = boss_location_region.get(location_name) or location_region.get(location_kind(location_name), KEEP)
+        region_name = (boss_location_region.get(location_name) or master_round_region.get(location_name)
+                       or (FORGE if location_name in npc_rescue_table else None)
+                       or location_region.get(location_kind(location_name), KEEP))
         region = regions[region_name]
         region.locations.append(GungeonLocation(player, location_name, location_table[location_name], region))
 

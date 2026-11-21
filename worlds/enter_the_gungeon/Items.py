@@ -186,10 +186,19 @@ persistent_upgrade_table = {
 }
 
 
+def get_all_upgrade_names(options) -> list:
+    """Every persistent upgrade this slot has, with repeats (in the pool or given at the start)."""
+    names = []
+    if options.persistent_upgrades.value:
+        for name, count in persistent_upgrade_counts.items():
+            names += [name] * count
+    return names
+
+
 def get_upgrade_item_names(options) -> list:
     """Persistent upgrade items this slot puts in the pool, with repeats."""
     names = []
-    if options.persistent_upgrades.value:
+    if options.persistent_upgrades.value and not options.start_with_upgrades.value:
         for name, count in persistent_upgrade_counts.items():
             names += [name] * count
     return names
@@ -206,18 +215,40 @@ base_character_items = ["Marine Paradox", "Convict Paradox", "Pilot Paradox", "H
 all_character_items = list(paradox_character_unlock_table)
 
 
+ARCHIPELAGO_TOKEN = "Archipelago Token"
+token_item_table = {ARCHIPELAGO_TOKEN: 8754700}
+
+
+def get_starting_chamber_access(options) -> int:
+    return min(options.starting_chamber_access.value, CHAMBER_ACCESS_COUNT) if options.chamber_access_locks.value else 0
+
+
+def get_token_count(options) -> int:
+    """Archipelago Tokens in the pool: Tokens Required, plus the extra from Token Pool Percentage."""
+    required = options.tokens_required.value
+    if required <= 0:
+        return 0
+    return max(required, (required * options.token_pool_percentage.value + 99) // 100)
+
+
+# Items Power Logic counts. Made progression when Power Logic is on.
+power_item_names = ["Random A Tier Gun", "Random S Tier Gun", "Random A Tier Passive", "Random S Tier Passive",
+                    "Random Rare Active Item"]
+
+
 def get_progression_item_names(options) -> list:
     """Every progression item this slot puts in the pool, with repeats. Used for both creation and counting."""
     names = list(progression_item_table)
 
     if options.chamber_access_locks.value:
-        names += [CHAMBER_ACCESS] * CHAMBER_ACCESS_COUNT
+        names += [CHAMBER_ACCESS] * (CHAMBER_ACCESS_COUNT - get_starting_chamber_access(options))
     if options.bullet_parts.value:
         names += list(bullet_part_table)
     if options.sell_creeps_favor.value:
         names.append(SELL_CREEPS_FAVOR)
     if options.paradox_mode.value == 1:
         names += all_character_items
+    names += [ARCHIPELAGO_TOKEN] * get_token_count(options)
 
     return names
 
@@ -231,9 +262,26 @@ item_table.update(useful_item_table)
 item_table.update(unlock_item_table)
 item_table.update(bullet_part_table)
 item_table.update(persistent_upgrade_table)
+item_table.update(token_item_table)
 
 fill_item_table = {}
 fill_item_table.update(gun_item_table)
 fill_item_table.update(passive_item_table)
 fill_item_table.update(pickup_item_table)
 fill_item_table.update(trap_item_table)
+
+
+# For "!hint <group>" and trackers
+item_name_groups = {
+    "Guns": {"Random D or C Tier Gun", "Random B Tier Gun", "Random A Tier Gun", "Random S Tier Gun"},
+    "Passives": {"Random D or C Tier Passive", "Random B Tier Passive", "Random A Tier Passive", "Random S Tier Passive"},
+    "Active Items": {"Random Active Item", "Random Rare Active Item"},
+    "Consumables": set(pickup_item_table),
+    "Traps": set(trap_item_table),
+    "Key Items": set(progression_item_table),
+    "Bullet Parts": set(bullet_part_table),
+    "Paradox Characters": set(paradox_character_unlock_table),
+    "Upgrades": set(persistent_upgrade_table),
+    "Unlocks": set(unlock_item_table),
+    "Power Items": set(power_item_names),
+}
