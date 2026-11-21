@@ -11,7 +11,7 @@ from ..AutoWorld import World, WebWorld
 
 client_version = 1
 
-useful_names = {"Random A Tier Gun", "Random S Tier Gun", "Random A Tier Item", "Random S Tier Item",
+useful_names = {"Random A Tier Gun", "Random S Tier Gun", "Random A Tier Passive", "Random S Tier Passive", "Random Rare Active Item",
                 "Reverse Curse Reversal"} | set(persistent_upgrade_table)
 progression_names = set(progression_item_table) | set(unlock_item_table) | set(bullet_part_table) \
     | set(paradox_character_unlock_table)
@@ -82,7 +82,7 @@ class GungeonWorld(World):
             "AchievementChecks": self.options.achievement_locations.value,
             "APItemChecks": self.options.ap_item_locations.value,
             "ExtraLocations": self.count_extra_locations(),
-            "APWorld": "0.4.0"
+            "APWorld": "0.4.1"
         }
 
     def count_extra_locations(self):

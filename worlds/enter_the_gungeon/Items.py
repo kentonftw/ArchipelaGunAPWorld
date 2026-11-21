@@ -3,46 +3,46 @@ from BaseClasses import Item
 class ItemPoolGeneration:
 
     short_item_count = {
-        "Random D Tier Gun": 4,
-        "Random C Tier Gun": 3,
+        "Random D or C Tier Gun": 4,
+        "Random Active Item": 3,
         "Random B Tier Gun": 3,
         "Random A Tier Gun": 2,
         "Random S Tier Gun": 1,
-        "Random D Tier Item": 4,
-        "Random C Tier Item": 3,
-        "Random B Tier Item": 4,
-        "Random A Tier Item": 3,
-        "Random S Tier Item": 2,
+        "Random D or C Tier Passive": 4,
+        "Random Rare Active Item": 3,
+        "Random B Tier Passive": 4,
+        "Random A Tier Passive": 3,
+        "Random S Tier Passive": 2,
         "Consumables": 10,
         "Traps": 10
     }
 
     standard_item_count = {
-        "Random D Tier Gun": 5,
-        "Random C Tier Gun": 4,
+        "Random D or C Tier Gun": 5,
+        "Random Active Item": 4,
         "Random B Tier Gun": 4,
         "Random A Tier Gun": 3,
         "Random S Tier Gun": 2,
-        "Random D Tier Item": 5,
-        "Random C Tier Item": 4,
-        "Random B Tier Item": 4,
-        "Random A Tier Item": 3,
-        "Random S Tier Item": 2,
+        "Random D or C Tier Passive": 5,
+        "Random Rare Active Item": 4,
+        "Random B Tier Passive": 4,
+        "Random A Tier Passive": 3,
+        "Random S Tier Passive": 2,
         "Consumables": 20,
         "Traps": 15
     }
 
     marathon_item_count = {
-        "Random D Tier Gun": 7,
-        "Random C Tier Gun": 5,
+        "Random D or C Tier Gun": 7,
+        "Random Active Item": 5,
         "Random B Tier Gun": 5,
         "Random A Tier Gun": 3,
         "Random S Tier Gun": 3,
-        "Random D Tier Item": 7,
-        "Random C Tier Item": 7,
-        "Random B Tier Item": 5,
-        "Random A Tier Item": 3,
-        "Random S Tier Item": 3,
+        "Random D or C Tier Passive": 7,
+        "Random Rare Active Item": 7,
+        "Random B Tier Passive": 5,
+        "Random A Tier Passive": 3,
+        "Random S Tier Passive": 3,
         "Consumables": 30,
         "Traps": 25
     }
@@ -104,19 +104,19 @@ class GungeonItem(Item):
 item_table = {}
 
 gun_item_table = {
-    "Random D Tier Gun": 8754000,
-    "Random C Tier Gun": 8754001,
+    "Random D or C Tier Gun": 8754000,
+    "Random Active Item": 8754001,
     "Random B Tier Gun": 8754002,
     "Random A Tier Gun": 8754003,
     "Random S Tier Gun": 8754004,
 }
 
 passive_item_table = {
-    "Random D Tier Item": 8754005,
-    "Random C Tier Item": 8754006,
-    "Random B Tier Item": 8754007,
-    "Random A Tier Item": 8754008,
-    "Random S Tier Item": 8754009,
+    "Random D or C Tier Passive": 8754005,
+    "Random Rare Active Item": 8754006,
+    "Random B Tier Passive": 8754007,
+    "Random A Tier Passive": 8754008,
+    "Random S Tier Passive": 8754009,
 }
 
 pickup_item_table = {
