@@ -154,9 +154,97 @@ def fill_achievement_locations():
     return
 
 
+# Cumulative enemy kills across runs. The count follows the Achievement Locations setting.
+ENEMY_KILLS = "Enemy Kills"
+ENEMY_KILLS_START_ID = 8755900
+enemy_kill_location_count = {0: 3, 1: 6, 2: 10}
+
+# First kill of each boss, and the region it's fought in (names match Regions.py)
+boss_location_start_id = 8756000
+boss_locations = [
+    ("Defeat Bullet King", "Keep of the Lead Lord"),
+    ("Defeat Gatling Gull", "Keep of the Lead Lord"),
+    ("Defeat Trigger Twins", "Keep of the Lead Lord"),
+    ("Defeat Ammoconda", "Gungeon Proper"),
+    ("Defeat Beholster", "Gungeon Proper"),
+    ("Defeat Gorgun", "Gungeon Proper"),
+    ("Defeat Cannonbalrog", "Black Powder Mine"),
+    ("Defeat Treadnaught", "Black Powder Mine"),
+    ("Defeat Mine Flayer", "Black Powder Mine"),
+    ("Defeat Door Lord", "Black Powder Mine"),
+    ("Defeat Wallmonger", "Hollow"),
+    ("Defeat High Priest", "Hollow"),
+    ("Defeat Kill Pillars", "Hollow"),
+    ("Defeat High Dragun", "Forge"),
+    ("Defeat Advanced Dragun", "Forge"),
+    ("Defeat Blobulord", "Oubliette"),
+    ("Defeat Old King", "Abbey of the True Gun"),
+    ("Defeat Resourceful Rat", "Resourceful Rat's Lair"),
+    ("Defeat Agunim", "R&G Dept."),
+    ("Defeat the Lich", "Bullet Hell"),
+]
+boss_location_table = {name: boss_location_start_id + i for i, (name, _) in enumerate(boss_locations)}
+boss_location_region = {name: region for name, region in boss_locations}
+
+# Master Rounds: beat a chamber's boss without taking damage
+master_round_start_id = 8756100
+master_round_locations = [
+    ("Master Round I", "Keep of the Lead Lord"),
+    ("Master Round II", "Gungeon Proper"),
+    ("Master Round III", "Black Powder Mine"),
+    ("Master Round IV", "Hollow"),
+    ("Master Round V", "Forge"),
+]
+master_round_table = {name: master_round_start_id + i for i, (name, _) in enumerate(master_round_locations)}
+master_round_region = {name: region for name, region in master_round_locations}
+
+# Shrines: first use of each kind. They can show up on any floor, so they live in the Keep.
+shrine_start_id = 8756200
+shrine_locations = [
+    "Use an Ammo Shrine",
+    "Use a Blank Shrine",
+    "Use a Blood Shrine",
+    "Use a Cleanse Shrine",
+    "Use a Companion Shrine",
+    "Use a Dice Shrine",
+    "Use a Glass Shrine",
+    "Use a Hero Shrine",
+    "Use a Junk Shrine",
+    "Use a Health Swap Shrine",
+    "Complete a Challenge Shrine",
+]
+shrine_table = {name: shrine_start_id + i for i, name in enumerate(shrine_locations)}
+
+# NPC rescues, detected from the game's own flags. Where each one's cell can appear varies, so they all
+# expect Forge access to keep logic safe.
+npc_rescue_start_id = 8756300
+npc_rescue_locations = [
+    "Rescue Flynt",
+    "Rescue Old Red",
+    "Rescue Cursula",
+    "Rescue Professor Goopton",
+    "Rescue Trorc",
+    "Rescue the Gunsling King",
+    "Rescue the Lost Adventurer",
+    "Rescue Tonic",
+    "Rescue Frifle and Mauser",
+    "Rescue Daisuke",
+    "Rescue Bowler",
+    "Rescue the Sorceress",
+    "Rescue the Synergrace",
+]
+npc_rescue_table = {name: npc_rescue_start_id + i for i, name in enumerate(npc_rescue_locations)}
+
 location_table = {}
 
 fill_achievement_locations()
+
+for i in range(max(enemy_kill_location_count.values())):
+    location_table[f"{ENEMY_KILLS} {i + 1}"] = ENEMY_KILLS_START_ID + i
+location_table.update(boss_location_table)
+location_table.update(master_round_table)
+location_table.update(shrine_table)
+location_table.update(npc_rescue_table)
 
 event_location_table = {
     "The High Dragun": None,

@@ -98,6 +98,22 @@ class AllowTeleporterSkips(Toggle):
     Off: those warps are removed from its random outcomes until you have access. Skips are never expected by logic."""
     display_name = "Allow Teleporter Prototype Skips"
 
+class BossChecks(DefaultOnToggle):
+    """Adds a check for the first kill of each boss: Bullet King, Gatling Gull, Trigger Twins, Ammoconda,
+    Beholster, Gorgun, Cannonbalrog, Treadnaught, Mine Flayer, Door Lord, Wallmonger, High Priest,
+    Kill Pillars, High Dragun, Advanced Dragun, Blobulord, Old King, Resourceful Rat, Agunim and the Lich."""
+    display_name = "Boss Checks"
+
+class EnemyKillChecks(DefaultOnToggle):
+    """Adds checks for total enemies killed across all runs. Short: 3, Standard: 6, Marathon: 10 checks,
+    following the Achievement Locations setting."""
+    display_name = "Enemy Kill Checks"
+
+class PersistentUpgrades(DefaultOnToggle):
+    """Adds permanent upgrades that apply at the start of every run: Progressive Max Health (x3),
+    Progressive Armor (x3), Progressive Blank (x3), Starting Casings (x4, 25 each) and Starting Key (x3)."""
+    display_name = "Persistent Upgrades"
+
 class GunItems(Choice):
     """Amount of Guns in your item pool"""
     display_name = "Gun Pool Items"
@@ -144,6 +160,79 @@ class APItemLocationChecks(Choice):
     default = 1
 
 
+class StartingChamberAccess(Range):
+    """How many Progressive Chamber Access you start with (0 = start locked in the Keep).
+    Only used when Chamber Access Locks are on."""
+    display_name = "Starting Chamber Access"
+    range_start = 0
+    range_end = 4
+    default = 0
+
+class StartWithUpgrades(Toggle):
+    """Start with every persistent upgrade instead of finding them in the multiworld."""
+    display_name = "Start With Upgrades"
+
+class FillerTrapPercentage(Range):
+    """Percent of the leftover filler (after the main item pool) that is traps instead of guns, items or pickups."""
+    display_name = "Filler Trap Percentage"
+    range_start = 0
+    range_end = 100
+    default = 25
+
+class ShopAPItems(Choice):
+    """How often shop items are replaced with AP Items."""
+    display_name = "Shop AP Items"
+    option_off = 0
+    option_rare = 1
+    option_normal = 2
+    option_frequent = 3
+    default = 2
+
+class MasterRoundChecks(DefaultOnToggle):
+    """Each Master Round (beat a chamber's boss without taking damage) is a check."""
+    display_name = "Master Round Checks"
+
+class ShrineChecks(Toggle):
+    """Using each kind of shrine once is a check, and so is finishing a Challenge Shrine.
+    Some shrines are rare, so these can take many runs."""
+    display_name = "Shrine Checks"
+
+class NPCRescueChecks(Toggle):
+    """Rescuing each Breach NPC from their cell is a check. If your save already rescued them,
+    those checks are sent as soon as you connect."""
+    display_name = "NPC Rescue Checks"
+
+class BossHunt(Range):
+    """Also require killing this many different bosses to win (0 = off). Turns on Boss Checks."""
+    display_name = "Boss Hunt"
+    range_start = 0
+    range_end = 20
+    default = 0
+
+class TokensRequired(Range):
+    """Also require finding this many Archipelago Tokens to win (0 = off)."""
+    display_name = "Tokens Required"
+    range_start = 0
+    range_end = 40
+    default = 0
+
+class TokenPoolPercentage(Range):
+    """How many Archipelago Tokens exist, as a percent of Tokens Required."""
+    display_name = "Token Pool Percentage"
+    range_start = 100
+    range_end = 200
+    default = 125
+
+class PowerLogic(Choice):
+    """Expect good items before deeper chambers: A/S tier guns and passives and rare actives.
+    Normal: 2 before Chamber 4, 4 before the Forge. Strict: 3 and 6. Off: only Chamber Access matters."""
+    display_name = "Power Logic"
+    option_off = 0
+    option_normal = 1
+    option_strict = 2
+    default = 1
+
+
 gungeon_option_groups = [
     OptionGroup("Boss Goals Options", [
         DragunGoal,
@@ -151,7 +240,10 @@ gungeon_option_groups = [
         LichGoal,
         BaseSecretChamberBosses,
         AdvancedGungeonDragunsBosses,
-        FarewellToArmsBosses
+        FarewellToArmsBosses,
+        BossHunt,
+        TokensRequired,
+        TokenPoolPercentage
     ]),
     OptionGroup("Randomizer Options", [
        DeathLink,
@@ -164,13 +256,26 @@ gungeon_option_groups = [
        BulletPartsAsItems,
        SellCreepsFavorItem,
        AllowGlitchChestSkips,
-       AllowTeleporterSkips
+       AllowTeleporterSkips,
+       StartingChamberAccess,
+       PowerLogic
+    ]),
+    OptionGroup("Extra Checks and Items", [
+       BossChecks,
+       EnemyKillChecks,
+       MasterRoundChecks,
+       ShrineChecks,
+       NPCRescueChecks,
+       PersistentUpgrades,
+       StartWithUpgrades,
+       ShopAPItems
     ]),
     OptionGroup("Gungeon Item Pool Options", [
        GunItems,
        PassiveItems,
        ConsumableItems,
-       TrapItems
+       TrapItems,
+       FillerTrapPercentage
     ]),
 
     OptionGroup("Location Check Options", [
@@ -230,6 +335,20 @@ class GungeonOptions(PerGameCommonOptions):
     sell_creeps_favor: SellCreepsFavorItem
     allow_glitch_chest_skips: AllowGlitchChestSkips
     allow_teleporter_skips: AllowTeleporterSkips
+    boss_checks: BossChecks
+    enemy_kill_checks: EnemyKillChecks
+    persistent_upgrades: PersistentUpgrades
+    start_with_upgrades: StartWithUpgrades
+    starting_chamber_access: StartingChamberAccess
+    power_logic: PowerLogic
+    master_round_checks: MasterRoundChecks
+    shrine_checks: ShrineChecks
+    npc_rescue_checks: NPCRescueChecks
+    shop_ap_items: ShopAPItems
+    boss_hunt: BossHunt
+    tokens_required: TokensRequired
+    token_pool_percentage: TokenPoolPercentage
+    filler_trap_percentage: FillerTrapPercentage
 
     guns: GunItems
     passives: PassiveItems
